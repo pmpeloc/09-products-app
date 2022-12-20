@@ -86,7 +86,7 @@ export const AuthProvider = ({ children }: any) => {
     } catch (error: any) {
       dispatch({
         type: 'addError',
-        payload: error.response.data.msg || 'This email is already register',
+        payload: error.response.data.errors[0].msg || 'Check the input data',
       });
     }
   };
