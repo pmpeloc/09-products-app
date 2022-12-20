@@ -1,7 +1,9 @@
+/* eslint-disable curly */
 /* eslint-disable react-native/no-inline-styles */
+import React, { useContext, useEffect } from 'react';
 import { StackScreenProps } from '@react-navigation/stack';
-import React from 'react';
 import {
+  Alert,
   Keyboard,
   KeyboardAvoidingView,
   Platform,
@@ -15,15 +17,27 @@ import { Background } from '../components/Background';
 import { WhiteLogo } from '../components/WhiteLogo';
 import { useForm } from '../hooks/useForm';
 import { loginStyles } from '../themes/loginTheme';
+import { AuthContext } from '../context/AuthContext';
 
 interface Props extends StackScreenProps<any, any> {}
 
 export const LoginScreen = ({ navigation }: Props) => {
+  const { signIn, removeError, errorMessage } = useContext(AuthContext);
+
   const { email, password, onChange } = useForm({ email: '', password: '' });
 
   const onLogin = () => {
     Keyboard.dismiss();
+    signIn({ correo: email, password });
   };
+
+  useEffect(() => {
+    if (!errorMessage.length) return;
+    Alert.alert('Incorrect Login', errorMessage, [
+      { text: 'Ok', onPress: removeError },
+    ]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [errorMessage]);
 
   return (
     <>
