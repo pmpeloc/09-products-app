@@ -1,5 +1,6 @@
-import React, { createContext, useState } from 'react';
-import { Product } from '../interfaces/app.interface';
+import React, { createContext, useEffect, useState } from 'react';
+import coffeeApi from '../api/coffeeApi';
+import { Product, ProductsResponse } from '../interfaces/app.interface';
 
 type ProductsContextProps = {
   products: Product[];
@@ -20,7 +21,18 @@ export const ProductsContext = createContext({} as ProductsContextProps);
 export const ProductsProvider = ({ children }: any) => {
   const [products, setProducts] = useState<Product[]>([]);
 
-  const loadProducts = async () => {};
+  useEffect(() => {
+    loadProducts();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  const loadProducts = async () => {
+    const { data } = await coffeeApi.get<ProductsResponse>(
+      '/productos?limite=50',
+    );
+    // setProducts([...products, ...data.productos]);
+    setProducts(data.productos);
+  };
 
   const addProduct = async (categoryId: string, productName: string) => {};
 
