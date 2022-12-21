@@ -1,4 +1,5 @@
 import React, { createContext, useEffect, useState } from 'react';
+import { ImagePickerResponse } from 'react-native-image-picker';
 import coffeeApi from '../api/coffeeApi';
 import { Product, ProductsResponse } from '../interfaces/app.interface';
 
@@ -13,7 +14,7 @@ type ProductsContextProps = {
   ) => Promise<void>;
   deleteProduct: (id: string) => Promise<void>;
   loadProductById: (id: string) => Promise<Product>;
-  uploadImage: (data: any, id: string) => Promise<void>; // TODO: cambiar ANY
+  uploadImage: (data: ImagePickerResponse, id: string) => Promise<void>; // TODO: cambiar ANY
 };
 
 export const ProductsContext = createContext({} as ProductsContextProps);
@@ -23,7 +24,6 @@ export const ProductsProvider = ({ children }: any) => {
 
   useEffect(() => {
     loadProducts();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const loadProducts = async () => {
@@ -67,9 +67,23 @@ export const ProductsProvider = ({ children }: any) => {
     return data;
   };
 
-  // TODO: cambiar ANY
-  const uploadImage = async (data: any, id: string) => {
-    console.log({ data, id });
+  const uploadImage = async (data: ImagePickerResponse, id: string) => {
+    const fileToUpload = {
+      uri: data.assets![0].uri,
+      type: data.assets![0].type,
+      name: data.assets![0].fileName,
+    };
+
+    const formData = new FormData();
+    formData.append('archivo', fileToUpload);
+    try {
+      const resp = await coffeeApi.put(`/uploads/productos/${id}`, formData, {
+        headers: { 'Content-Type': 'multipart/form-data' },
+      });
+      console.log(resp);
+    } catch (error) {
+      console.log(error);
+    }
   };
 
   return (
