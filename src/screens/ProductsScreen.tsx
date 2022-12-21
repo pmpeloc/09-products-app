@@ -1,8 +1,9 @@
 /* eslint-disable react-native/no-inline-styles */
-import React, { useContext, useEffect } from 'react';
+import React, { useContext, useEffect, useState } from 'react';
 import { StackScreenProps } from '@react-navigation/stack';
 import {
   FlatList,
+  RefreshControl,
   StyleSheet,
   Text,
   TouchableOpacity,
@@ -16,7 +17,9 @@ interface Props
   extends StackScreenProps<ProductsStackParams, 'ProductsScreen'> {}
 
 export const ProductsScreen = ({ navigation }: Props) => {
-  const { products } = useContext(ProductsContext);
+  const { products, loadProducts } = useContext(ProductsContext);
+
+  const [isRefreshing, setIsRefreshing] = useState(false);
 
   useEffect(() => {
     navigation.setOptions({
@@ -31,6 +34,12 @@ export const ProductsScreen = ({ navigation }: Props) => {
     });
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
+
+  const loadProductsFromBackend = async () => {
+    setIsRefreshing(true);
+    await loadProducts();
+    setIsRefreshing(false);
+  };
 
   return (
     <View style={{ flex: 1, marginHorizontal: 10 }}>
@@ -50,6 +59,12 @@ export const ProductsScreen = ({ navigation }: Props) => {
           </TouchableOpacity>
         )}
         ItemSeparatorComponent={() => <View style={styles.itemSeparator} />}
+        refreshControl={
+          <RefreshControl
+            refreshing={isRefreshing}
+            onRefresh={loadProductsFromBackend}
+          />
+        }
       />
     </View>
   );
